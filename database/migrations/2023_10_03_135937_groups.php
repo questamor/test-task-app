@@ -15,8 +15,6 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->unsignedSmallInteger('expire_hours')->comment('через какое количество часов пользователь после добавления в группу должен быть исключен из группы');
-
-            $table->timestamps();
         });
     }
 

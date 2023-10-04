@@ -16,8 +16,6 @@ return new class extends Migration
             $table->foreignId('group_id')->constrained('groups')->cascadeOnDelete();
             $table->primary(['user_id', 'group_id']);
             $table->dateTime('expired_at');
-
-            $table->timestamps();
         });
     }
 
