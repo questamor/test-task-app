@@ -20,22 +20,12 @@ class SendGroupExpiredEmail implements ShouldQueue
     protected $details;
     public $timeout = 3600;
 
-    /**
-     * Create a new job instance.
-     *
-     * @return void
-     */
     public function __construct(string $emailAddress, array $details)
     {
         $this->emailAddress = $emailAddress;
         $this->details = $details;
     }
 
-    /**
-     * Execute the job.
-     *
-     * @return void
-     */
     public function handle() :void
     {
         Mail::to($this->emailAddress)->send(new UserMail($this->details));

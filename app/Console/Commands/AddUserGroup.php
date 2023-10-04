@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Group;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Database\UniqueConstraintViolationException;
 
 class AddUserGroup extends Command
@@ -31,8 +32,16 @@ class AddUserGroup extends Command
         $userId = $this->ask('user_id пользователя');
         $groupId = $this->ask('group_id группы');
 
-        $user = User::find($userId);
-        $group = Group::find($groupId);
+        try
+        {
+            $user = User::findOrFail($userId);
+            $group = Group::findOrFail($groupId);
+        }
+        catch (ModelNotFoundException $e)
+        {
+            $this->info('Пользователь или группа с таким идентификатором не найдена');
+            return Command::FAILURE;
+        }
 
         try
         {

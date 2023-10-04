@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\DeactivateOrphanUser;
 use App\Jobs\SendGroupExpiredEmail;
 use App\Models\GroupUser;
 use Carbon\Carbon;
@@ -22,7 +23,7 @@ class UserCheckExpiration extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Исключить из групп всех пользователей, у которых expired_at меньше текущего момента времени';
     
     /**
      * Execute the console command.
@@ -39,12 +40,15 @@ class UserCheckExpiration extends Command
                 {
                     $groupUser->user->groups()->detach($groupUser->group_id);
                 
-                    $job = (new SendGroupExpiredEmail($groupUser->user->email, [
+                    $emailJob = (new SendGroupExpiredEmail($groupUser->user->email, [
                         'subject' => 'Исключение из группы',
                         'body' => "Здравствуйте, {$groupUser->user->name}! Истекло время вашего участия в группе {$groupUser->group->name}"
                     ]))->delay(now()->addSeconds(2)); 
 
-                    dispatch($job)->onQueue('emails');
+                    $deactivateUserJob = (new DeactivateOrphanUser($groupUser->user))->delay(now()->addSeconds(2)); 
+
+                    dispatch($emailJob)->onQueue('emails');
+                    dispatch($deactivateUserJob)->onQueue('default');
                 }
                 catch (Exception $ex)
                 {
